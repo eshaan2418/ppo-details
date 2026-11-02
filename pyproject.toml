@@ -9,7 +9,7 @@ requires-python = ">=3.11"
 dependencies = ["numpy>=1.26", "torch>=2.3", "gymnasium[mujoco]>=1.0"]
 
 [project.optional-dependencies]
-bench = ["stable-baselines3>=2.3", "matplotlib>=3.8"]
+bench = ["stable-baselines3>=2.3", "matplotlib>=3.8", "scipy>=1.11"]
 dev = ["pytest>=8", "hypothesis>=6", "ruff>=0.6", "mypy>=1.10"]
 
 [project.scripts]
