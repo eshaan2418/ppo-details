@@ -1,0 +1,29 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu || pip install torch
+          pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check src tests scripts
+      - name: Type check
+        run: mypy
+      - name: GAE, normalisation and clipping tests + CartPole learning test
+        run: pytest -q
+      - name: Smoke train (CartPole, 60k steps)
+        run: pytest -q tests/test_ppo.py -k cartpole
+
+

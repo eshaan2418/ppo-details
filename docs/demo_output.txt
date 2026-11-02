@@ -1,0 +1,12 @@
+step    9,216  return     43.8  kl 0.0002  clipfrac 0.00  ####
+step   18,432  return     87.3  kl 0.0002  clipfrac 0.00  ########
+step   27,648  return    115.2  kl 0.0002  clipfrac 0.00  ###########
+step   36,864  return    182.7  kl 0.0000  clipfrac 0.00  ##################
+step   46,080  return    171.7  kl 0.0000  clipfrac 0.00  #################
+step   55,296  return    197.2  kl 0.0000  clipfrac 0.00  ###################
+step   64,512  return    245.7  kl 0.0000  clipfrac 0.00  ########################
+step   73,728  return    217.4  kl 0.0000  clipfrac 0.00  #####################
+step   82,944  return    213.7  kl 0.0000  clipfrac 0.00  #####################
+step   92,160  return    250.8  kl 0.0000  clipfrac 0.00  #########################
+step   99,328  return    199.3  kl 0.0000  clipfrac 0.00  ###################
+final return (last 10% of training): 203.6 in 2s

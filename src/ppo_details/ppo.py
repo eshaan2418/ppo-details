@@ -14,6 +14,7 @@ import json
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any
 
 import gymnasium as gym
 import numpy as np
@@ -50,7 +51,7 @@ class PPOConfig:
     tag: str = "full"
 
 
-PRESETS = {
+PRESETS: dict[str, dict[str, Any]] = {
     "discrete": dict(num_envs=8, num_steps=128, lr=2.5e-4, update_epochs=4, num_minibatches=4,
                      ent_coef=0.01, obs_norm=False, reward_norm=False),
     "mujoco": dict(num_envs=1, num_steps=2048, lr=3e-4, update_epochs=10, num_minibatches=32,
@@ -117,7 +118,7 @@ class Agent(nn.Module):
         self.critic = nn.Sequential(layer(obs_dim, h, s2, o), nn.Tanh(), layer(h, h, s2, o),
                                     nn.Tanh(), layer(h, 1, 1.0, o))
         self.discrete = isinstance(act_space, gym.spaces.Discrete)
-        n_out = int(act_space.n) if self.discrete else int(np.prod(act_space.shape))  # type: ignore[attr-defined]
+        n_out = int(act_space.n) if self.discrete else int(np.prod(act_space.shape or ()))  # type: ignore[attr-defined]
         self.actor = nn.Sequential(layer(obs_dim, h, s2, o), nn.Tanh(), layer(h, h, s2, o),
                                    nn.Tanh(), layer(h, n_out, 0.01, o))
         if not self.discrete:

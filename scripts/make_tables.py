@@ -92,8 +92,18 @@ def main() -> None:
         if len(full) < 2:
             continue
         out += [f"## Ablations on {env} (each removes one detail from full PPO), 5 seeds\n",
-                "| variant | final return | Δ final vs full (95% CI) | p | mean return over "
-                "training (AUC) | Δ AUC vs full |", "|---|---|---|---|---|---|"]
+                "| variant | final return | Δ final vs full (95% CI) | p | p (Holm) | mean return "
+                "over training (AUC) | Δ AUC vs full |", "|---|---|---|---|---|---|---|"]
+        pvals = {}
+        for tag in LABEL:
+            rs = ours.get((env, tag), [])
+            if tag != "full" and len(rs) >= 2:
+                pvals[tag] = welch(full, [r["final_return"] for r in rs])[2]
+        order = sorted(pvals, key=pvals.get)
+        holm, running = {}, 0.0
+        for i, tag in enumerate(order):
+            running = max(running, min(1.0, (len(order) - i) * pvals[tag]))
+            holm[tag] = running
         for tag in LABEL:
             rs = ours.get((env, tag), [])
             if len(rs) < 2:
@@ -103,13 +113,14 @@ def main() -> None:
             mf, hf = tci(f)
             ma, ha = tci(au)
             if tag == "full":
-                out.append(f"| {LABEL[tag]} | {mf:.1f} ± {hf:.1f} | - | - | {ma:.1f} ± {ha:.1f} "
+                out.append(f"| {LABEL[tag]} | {mf:.1f} ± {hf:.1f} | - | - | - | "
+                           f"{ma:.1f} ± {ha:.1f} "
                            "| - |")
                 continue
             d, h, p = welch(full, f)
             da, hda, _ = welch(full_auc, au)
             out.append(f"| {LABEL[tag]} | {mf:.1f} ± {hf:.1f} | {d:+.1f} ± {h:.1f} | {p:.3f} | "
-                       f"{ma:.1f} ± {ha:.1f} | {da:+.1f} ± {hda:.1f} |")
+                       f"{holm[tag]:.3f} | {ma:.1f} ± {ha:.1f} | {da:+.1f} ± {hda:.1f} |")
         out.append("")
     (RES / "tables.md").write_text("\n".join(out) + "\n")
     print("\n".join(out))
@@ -128,6 +139,7 @@ def main() -> None:
             ax.fill_between(x, m - 1.96 * s, m + 1.96 * s, color=col, alpha=0.2)
         ax.set_title(env, fontsize=9)
         ax.set_xlabel("env steps")
+        ax.ticklabel_format(axis="x", style="sci", scilimits=(0, 0))
         ax.spines[["top", "right"]].set_visible(False)
     axes[0].set_ylabel("episodic return")
     axes[0].legend(frameon=False, fontsize=8)
